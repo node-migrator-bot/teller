@@ -1,4 +1,2 @@
-teller
-======
-
-Basic web server.
+#teller
+Basic node.js webserver.

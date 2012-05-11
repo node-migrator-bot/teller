@@ -1,0 +1,15 @@
+{
+  "name": "teller",
+  "description" : "Basic node.js webserver.",
+  "version" : "0.1.0",
+  "main": "./index.js",
+  "author" : "Craig Rogers <hello@crai.gr>",
+  "devDependencies": {
+    "mocha": "*",
+    "request": "*",
+    "should": "*"
+  },
+  "scripts": {
+    "test": "make test"
+  }
+}
