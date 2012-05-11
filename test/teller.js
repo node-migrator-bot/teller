@@ -4,14 +4,11 @@ var should = require('should')
 var app = require('../index')
 app.get('/', function(req, res) {
   res.end('get')
-})
-app.get(/^\/(reg|ex)$/, function(req, res) {
+}).get(/^\/(reg|ex)$/, function(req, res) {
   res.end('regex')
-})
-app.get('/query', function(req, res) {
+}).get('/query', function(req, res) {
   res.end(req.query.a)
-})
-app.listen(1234)
+}).listen(1234)
 
 describe('app', function() {
 
