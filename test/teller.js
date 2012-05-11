@@ -8,6 +8,8 @@ app.get('/', function(req, res) {
   res.end('regex')
 }).get('/query', function(req, res) {
   res.end(req.query.a)
+}).get('/json', function(req, res) {
+  res.json(req.query, req.query.code)
 }).listen(1234)
 
 describe('app', function() {
@@ -37,6 +39,27 @@ describe('app', function() {
         done()
       })
     })
+  })
+  
+  describe('res.json()', function() {
+    it('should respond with json', function(done) {
+      request('http://localhost:1234/json?code=200', function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        res.headers['content-type'].should.equal('application/json')
+        body.should.equal('{"code":"200"}')
+        done()
+      })
+    })
+    it('should respond with correct status codes', function(done) {
+      request('http://localhost:1234/json?code=404', function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        res.statusCode.should.equal(404)
+        body.should.equal('{"code":"404"}')
+        done()
+      })
+    })  
   })
 
 })
