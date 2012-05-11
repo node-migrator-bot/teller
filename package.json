@@ -4,6 +4,9 @@
   "version" : "0.1.0",
   "main": "./index.js",
   "author" : "Craig Rogers <hello@crai.gr>",
+  "dependencies": {
+    "crossroads": "0.8.0"
+  },
   "devDependencies": {
     "mocha": "*",
     "request": "*",
