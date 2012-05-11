@@ -12,7 +12,10 @@ var server = function(req, res) {
 
 module.exports = {
   get: function(route, cb) {
-    crossroads.addRoute(route, cb)
+    crossroads.addRoute(route, function(req, res) {
+      req.query = qs.parse(req.url.query)
+      cb(req, res)
+    })
   },
   listen: function(port) {
     http.createServer(server).listen(port)

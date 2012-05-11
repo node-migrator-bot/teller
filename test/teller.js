@@ -8,6 +8,9 @@ app.get('/', function(req, res) {
 app.get(/^\/(reg|ex)$/, function(req, res) {
   res.end('regex')
 })
+app.get('/query', function(req, res) {
+  res.end(req.query.a)
+})
 app.listen(1234)
 
 describe('app', function() {
@@ -26,6 +29,14 @@ describe('app', function() {
         should.not.exist(err)
         should.exist(res)
         body.should.equal('regex')
+        done()
+      })
+    })
+    it('should pass through parsed query string', function(done) {
+      request('http://localhost:1234/query?a=b', function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        body.should.equal('b')
         done()
       })
     })
