@@ -1,4 +1,5 @@
 var crossroads = require('crossroads')
+var mu = require('mu2')
 
 var http = require('http')
 var qs = require('querystring')
@@ -7,6 +8,18 @@ var util = require('util')
 
 var app = {}
 
+
+app.setTemplateDir = function(dir) {
+  mu.root = dir
+  return app
+} 
+
+var render = function(template, data, code) {
+  var head = { 'Content-Type': 'text/html' }
+  this.writeHead(code === undefined ? 200 : code, head)
+  var stream = mu.compileAndRender(template, data)
+  util.pump(stream, this)
+}
 
 var json = function(obj, code) {
   var body = JSON.stringify(obj)
@@ -19,6 +32,7 @@ var json = function(obj, code) {
 
 var server = function(req, res) {
   res.json = json
+  res.render = render
   req.url = url.parse(req.url)
   crossroads.parse(req.url.pathname, [req, res])
 }
@@ -36,5 +50,6 @@ app.get = function(route, cb) {
   })
   return app
 }
+
 
 module.exports = app

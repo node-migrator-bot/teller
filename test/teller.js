@@ -1,16 +1,25 @@
 var request = require('request')
 var should = require('should')
 
-var app = require('../index')
-app.get('/', function(req, res) {
-  res.end('get')
-}).get(/^\/(reg|ex)$/, function(req, res) {
-  res.end('regex')
-}).get('/query', function(req, res) {
-  res.end(req.query.a)
-}).get('/json', function(req, res) {
-  res.json(req.query, req.query.code)
-}).listen(1234)
+require('../index')
+  .get('/', function(req, res) {
+    res.end('get')
+  })
+  .get(/^\/(reg|ex)$/, function(req, res) {
+    res.end('regex')
+  })
+  .get('/query', function(req, res) {
+    res.end(req.query.a)
+  })
+  .get('/json', function(req, res) {
+    res.json(req.query, req.query.code)
+  })
+  .get('/render', function(req, res) {
+    var data = { title: req.query.code }
+    res.render('template.html', data, req.query.code)
+  })
+  .setTemplateDir(__dirname)
+  .listen(1234)
 
 describe('app', function() {
 
@@ -60,6 +69,27 @@ describe('app', function() {
         done()
       })
     })  
+  })
+  
+  describe('res.render()', function() {
+    it('should respond with rendered html', function(done) {
+      request('http://localhost:1234/render?code=200', function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        res.headers['content-type'].should.equal('text/html')
+        body.should.equal('<h1>200</h1>')
+        done()
+      })
+    })
+    it('should respond with correct status code', function(done) {
+      request('http://localhost:1234/render?code=404', function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        res.statusCode.should.equal(404)
+        body.should.equal('<h1>404</h1>')
+        done()
+      })
+    })
   })
 
 })
