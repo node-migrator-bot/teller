@@ -1,28 +1,35 @@
 var crossroads = require('crossroads')
+var ejs = require('ejs')
 var formidable = require('formidable')
-var mu = require('mu2')
 
+var fs = require('fs')
 var http = require('http')
 var qs = require('querystring')
 var url = require('url')
-var util = require('util')
 
 var app = {}
+var dir = '/'
 var routes = {
   get: crossroads.create(),
   post: crossroads.create()
 }
 
-app.setTemplateDir = function(dir) {
-  mu.root = dir
+app.setTemplateDir = function(newDir) {
+  dir = newDir
   return app
 } 
 
 var render = function(template, data, code) {
-  var head = { 'Content-Type': 'text/html' }
-  this.writeHead(code === undefined ? 200 : code, head)
-  var stream = mu.compileAndRender(template, data)
-  util.pump(stream, this)
+  var res = this
+  template = [dir, template].join('/')
+  fs.readFile(template, function (err, buff) {
+    if (err) throw err
+    var html = ejs.render(buff.toString(), data)
+    code = code === undefined ? 200 : code
+    var head = { 'Content-Type': 'text/html' }
+    res.writeHead(code, head)
+    res.end(html)
+  })
 }
 
 var json = function(obj, code) {

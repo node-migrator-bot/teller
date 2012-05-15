@@ -16,7 +16,7 @@ require('../index')
   })
   .get('/render', function(req, res) {
     var data = { title: req.query.code }
-    res.render('template.html', data, req.query.code)
+    res.render('template.ejs', data, req.query.code)
   })
   .get('/redirect', function(req, res) {
     res.redirect('/render', req.query.code)
@@ -32,6 +32,7 @@ require('../index')
   })
   .setTemplateDir(__dirname)
   .listen(1234)
+
 
 describe('app', function() {
 
