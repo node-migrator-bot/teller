@@ -6,6 +6,7 @@
   "author" : "Craig Rogers <hello@crai.gr>",
   "dependencies": {
     "crossroads": "0.8.0",
+    "formidable": "1.0.9",
     "mu2": "0.5.13"
   },
   "devDependencies": {

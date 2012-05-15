@@ -1,4 +1,5 @@
 var crossroads = require('crossroads')
+var formidable = require('formidable')
 var mu = require('mu2')
 
 var http = require('http')
@@ -7,7 +8,10 @@ var url = require('url')
 var util = require('util')
 
 var app = {}
-
+var routes = {
+  get: crossroads.create(),
+  post: crossroads.create()
+}
 
 app.setTemplateDir = function(dir) {
   mu.root = dir
@@ -41,7 +45,9 @@ var server = function(req, res) {
   res.render = render
   res.redirect = redirect
   req.url = url.parse(req.url)
-  crossroads.parse(req.url.pathname, [req, res])
+
+  var method = req.method.toLowerCase()
+  routes[method].parse(req.url.pathname, [req, res])
 }
 
 app.listen = function(port) {
@@ -51,9 +57,21 @@ app.listen = function(port) {
 
 
 app.get = function(route, cb) {
-  crossroads.addRoute(route, function(req, res) {
+  routes.get.addRoute(route, function(req, res) {
     req.query = qs.parse(req.url.query)
     cb(req, res)
+  })
+  return app
+}
+
+app.post = function(route, cb) {
+  routes.post.addRoute(route, function(req, res) {
+    var form = new formidable.IncomingForm()
+    form.parse(req, function(err, fields, files) {
+      req.body = fields
+      req.files = files
+      cb(req, res)
+    })
   })
   return app
 }

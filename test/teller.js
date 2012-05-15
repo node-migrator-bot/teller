@@ -21,6 +21,15 @@ require('../index')
   .get('/redirect', function(req, res) {
     res.redirect('/render', req.query.code)
   })
+  .post('/post', function(req, res) {
+    res.end('post')
+  })
+  .post(/^\/[a-z][0-9]$/, function(req, res) {
+    res.end('regex')
+  })
+  .post('/body', function(req, res) {
+    res.end(req.body.a)
+  })
   .setTemplateDir(__dirname)
   .listen(1234)
 
@@ -48,6 +57,45 @@ describe('app', function() {
         should.not.exist(err)
         should.exist(res)
         body.should.equal('b')
+        done()
+      })
+    })
+  })
+  
+  describe('post()', function() {
+    it('should match a string route', function(done) {
+      request({
+        form: {},
+        url: 'http://localhost:1234/post',
+        method: 'post'
+      }, function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        body.should.equal('post')
+        done()
+      })
+    })
+    it('should match a regex route', function(done) {
+      request({
+        form: {},
+        url: 'http://localhost:1234/a1',
+        method: 'post'
+      }, function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        body.should.equal('regex')
+        done()
+      })
+    })
+    it('should pass through parsed form fields', function(done) {
+      request({
+        form: { a: 1 },
+        url: 'http://localhost:1234/body',
+        method: 'post'
+      }, function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        body.should.equal('1')
         done()
       })
     })
