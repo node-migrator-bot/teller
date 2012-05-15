@@ -1,6 +1,8 @@
 #teller
 Simple node.js webserver.
 
+[![Build Status](https://secure.travis-ci.org/twentyrogersc/teller.png)](http://travis-ci.org/twentyrogersc/teller)
+
 ## Installation
 
 ```javascript
