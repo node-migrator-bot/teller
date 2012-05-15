@@ -29,10 +29,17 @@ var json = function(obj, code) {
   this.end(body)
 }
 
+var redirect = function(url, code) {
+  code = code === undefined ? 302 : code
+  this.writeHead(code, { Location: url })
+  this.end()
+}
+
 
 var server = function(req, res) {
   res.json = json
   res.render = render
+  res.redirect = redirect
   req.url = url.parse(req.url)
   crossroads.parse(req.url.pathname, [req, res])
 }

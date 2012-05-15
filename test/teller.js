@@ -18,6 +18,9 @@ require('../index')
     var data = { title: req.query.code }
     res.render('template.html', data, req.query.code)
   })
+  .get('/redirect', function(req, res) {
+    res.redirect('/render', req.query.code)
+  })
   .setTemplateDir(__dirname)
   .listen(1234)
 
@@ -87,6 +90,28 @@ describe('app', function() {
         should.exist(res)
         res.statusCode.should.equal(404)
         body.should.equal('<h1>404</h1>')
+        done()
+      })
+    })
+  })
+  
+  describe('res.redirect()', function() {
+    it('should redirect to to correct page', function(done) {
+      request('http://localhost:1234/redirect', function(err, res) {
+        should.not.exist(err)
+        should.exist(res)
+        res.request.uri.pathname.should.equal('/render')
+        done()
+      })
+    })
+    it('should redirect with correct status code', function(done) {
+      request({
+        followRedirect: false,
+        url: 'http://localhost:1234/redirect?code=303'
+      }, function(err, res) {
+        should.not.exist(err)
+        res.statusCode.should.equal(303)
+        res.headers.location.should.equal('/render')
         done()
       })
     })
