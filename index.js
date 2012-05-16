@@ -1,6 +1,7 @@
 var crossroads = require('crossroads')
 var ejs = require('ejs')
 var formidable = require('formidable')
+var static = require('node-static')
 
 var fs = require('fs')
 var http = require('http')
@@ -8,20 +9,53 @@ var qs = require('querystring')
 var url = require('url')
 
 var app = {}
-var dir = '/'
+var settings = {}
 var routes = {
   get: crossroads.create(),
   post: crossroads.create()
 }
 
-app.setTemplateDir = function(newDir) {
-  dir = newDir
+
+app.settings = function(opts) {
+  for (var opt in opts) {
+    switch(opt) {
+      case 'template':
+      case 'static':
+        add[opt](opts[opt])
+        break
+    }
+  }
   return app
-} 
+}
+
+var add = {
+  static: function(opts) {
+    var file = new static.Server(opts.dir)
+    
+    var last = opts.route.charAt(opts.route.length-1)
+    var regex = last !== '/' ? opts.route+'/' : opts.route
+    regex = '^'+regex.replace(/\//g, '\\/')+'(.{0,})$'
+    regex = new RegExp(regex)
+    
+    var staticCb = function(req, res) {
+      var path = req.url.pathname.match(regex)[1]
+      req.addListener('end', function() {
+        file.serveFile(path, 400, {}, req, res)
+      })
+    }
+    
+    routes.get.addRoute(regex, staticCb, 1)
+    routes.post.addRoute(regex, staticCb, 1)
+  },
+  template: function(opts) {
+    settings.template = opts.dir
+  }
+}
+
 
 var render = function(template, data, code) {
   var res = this
-  template = [dir, template].join('/')
+  template = [settings.template, template].join('/')
   fs.readFile(template, function (err, buff) {
     if (err) throw err
     var html = ejs.render(buff.toString(), data)

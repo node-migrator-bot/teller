@@ -38,6 +38,17 @@ app.post(route, function(req, res) {
 })
 ```
 
+### app.settings()
+
+Settings for template rendering and static file serving.
+
+```javascript
+app.settings({
+  template: { dir: __dirname+'/templates' },
+  static: { route: '/public', dir: __dirname+'/public' }
+})
+```
+
 ### app.listen()
 
 Begin accepting connections on the specified port.
@@ -48,18 +59,18 @@ app.listen(1234)
 
 ## Response
 
-### res.render
+### res.render()
 
-Render the specified template. In order to call this, app.setTemplateDir() is required to set the directory of the templates. Data and statusCode are not required.
+Render the specified template, the path of which must be specified in app.settings(). Data and statusCode are not required.
 
 ```javascript
-app.setTemplateDir(__dirname)
+app.settings({ dir: __dirname+'/templates' })
 app.get(route, function(req, res) {
   res.render('template.ejs', data, statusCode)
 })
 ```
 
-### res.json
+### res.json()
 
 Render the object as json. StatusCode is not required.
 
@@ -69,7 +80,7 @@ app.get(route, function(req, res) {
 })
 ```
 
-### res.redirect
+### res.redirect()
 
 Redirect to another url. StatusCode is not required.
 

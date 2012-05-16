@@ -30,7 +30,10 @@ require('../index')
   .post('/body', function(req, res) {
     res.end(req.body.a)
   })
-  .setTemplateDir(__dirname)
+  .settings({
+    template: { dir: __dirname },
+    static: { route: '/public', dir: __dirname+'/static' }
+  })
   .listen(1234)
 
 
@@ -102,7 +105,23 @@ describe('app', function() {
     })
   })
   
-  describe('res.json()', function() {
+  describe('settings()', function() {
+    it('should allow static file serving', function(done) {
+      request('http://localhost:1234/public/static.txt', function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        res.headers['content-type'].should.equal('text/plain')
+        body.should.equal('static')
+        done()
+      })
+    })
+  })
+  
+})
+
+describe('res', function() {
+  
+  describe('json()', function() {
     it('should respond with json', function(done) {
       request('http://localhost:1234/json?code=200', function(err, res, body) {
         should.not.exist(err)
@@ -123,7 +142,7 @@ describe('app', function() {
     })  
   })
   
-  describe('res.render()', function() {
+  describe('render()', function() {
     it('should respond with rendered html', function(done) {
       request('http://localhost:1234/render?code=200', function(err, res, body) {
         should.not.exist(err)
@@ -144,7 +163,7 @@ describe('app', function() {
     })
   })
   
-  describe('res.redirect()', function() {
+  describe('redirect()', function() {
     it('should redirect to to correct page', function(done) {
       request('http://localhost:1234/redirect', function(err, res) {
         should.not.exist(err)

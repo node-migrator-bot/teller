@@ -1,7 +1,7 @@
 {
   "name": "teller",
   "description" : "Basic node.js webserver.",
-  "version" : "0.1.0",
+  "version" : "0.2.0",
   "main": "./index.js",
   "repository": {
     "type": "git",
@@ -11,7 +11,8 @@
   "dependencies": {
     "crossroads": "0.8.0",
     "ejs": "0.7.1",
-    "formidable": "1.0.9"
+    "formidable": "1.0.9",
+    "node-static": "0.5.9"
   },
   "devDependencies": {
     "mocha": "*",
