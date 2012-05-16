@@ -1,7 +1,7 @@
 {
   "name": "teller",
-  "description" : "Basic node.js webserver.",
-  "version" : "0.2.0",
+  "description" : "Simple node.js webserver.",
+  "version" : "0.3.0",
   "main": "./index.js",
   "repository": {
     "type": "git",

@@ -40,7 +40,7 @@ var add = {
     var staticCb = function(req, res) {
       var path = req.url.pathname.match(regex)[1]
       req.addListener('end', function() {
-        file.serveFile(path, 400, {}, req, res)
+        file.serveFile(path, 200, {}, req, res)
       })
     }
     

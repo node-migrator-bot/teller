@@ -111,6 +111,7 @@ describe('app', function() {
         should.not.exist(err)
         should.exist(res)
         res.headers['content-type'].should.equal('text/plain')
+        res.statusCode.should.equal(200)
         body.should.equal('static')
         done()
       })
