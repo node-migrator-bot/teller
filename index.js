@@ -42,12 +42,12 @@ var addStaticRouting = function(opts) {
     file = path.join(opts.dir, file)
     
     if (path.existsSync(file) === false) {
-      return res.end('404')
+      return res.show404()
     }
     if (fs.statSync(file).isDirectory()) {
       file = file+'/index.html'
       if (path.existsSync(file) === false) {
-        return res.end('404')
+        return res.show404()
       }
     }
     
@@ -83,6 +83,12 @@ var render = function(template, data, code) {
   this.end(html)
 }
 
+var show404 = function() {
+  var head = { 'Content-Type': 'text/html' }
+  this.writeHead(404, head)
+  this.end('<h1>404, not found</h1>')
+}
+
 var json = function(obj, code) {
   var body = JSON.stringify(obj)
   code = code === undefined ? 200 : code
@@ -102,6 +108,7 @@ var server = function(req, res) {
   res.json = json
   res.render = render
   res.redirect = redirect
+  res.show404 = show404
   req.url = url.parse(req.url)
 
   var method = req.method.toLowerCase()

@@ -21,6 +21,9 @@ require('../index')
   .get('/redirect', function(req, res) {
     res.redirect('/render', req.query.code)
   })
+  .get('/404', function(req, res) {
+    res.show404()
+  })
   .post('/post', function(req, res) {
     res.end('post')
   })
@@ -116,6 +119,14 @@ describe('app', function() {
         done()
       })
     })
+    it('should return a 404 if static file is not found', function(done) {
+      request('http://localhost:1234/public/static.tx', function(err, res, body) {
+        res.headers['content-type'].should.equal('text/html')
+        res.statusCode.should.equal(404)
+        body.should.equal('<h1>404, not found</h1>')
+        done()
+      })
+    })
   })
   
 })
@@ -181,6 +192,17 @@ describe('res', function() {
         should.not.exist(err)
         res.statusCode.should.equal(303)
         res.headers.location.should.equal('/render')
+        done()
+      })
+    })
+  })
+  
+  describe('show404()', function() {
+    it('should show the default 404 page', function(done) {
+      request('http://localhost:1234/404', function(err, res, body) {
+        res.headers['content-type'].should.equal('text/html')
+        res.statusCode.should.equal(404)
+        body.should.equal('<h1>404, not found</h1>')
         done()
       })
     })

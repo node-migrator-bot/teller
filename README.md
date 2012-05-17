@@ -89,3 +89,13 @@ app.get(route, function(req, res) {
   res.redirect('/login', statusCode)
 })
 ```
+
+### res.show404()
+
+Sends the default 404 page.
+
+```javascript
+app.get(route, function(req, res) {
+  res.show404()
+})
+```
