@@ -1,5 +1,6 @@
 #teller
-Simple node.js webserver.
+Simple node.js webserver.  
+Dependencies: [crossroads](http://millermedeiros.github.com/crossroads.js/), [ejs](https://github.com/visionmedia/ejs), [mime](https://github.com/bentomas/node-mime), [formidable](https://github.com/felixge/node-formidable), [wrench](https://github.com/ryanmcgrath/wrench-js)
 
 [![Build Status](https://secure.travis-ci.org/twentyrogersc/teller.png)](http://travis-ci.org/twentyrogersc/teller)
 
