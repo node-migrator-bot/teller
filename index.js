@@ -1,7 +1,7 @@
 var crossroads = require('crossroads')
 var ejs = require('ejs')
 var formidable = require('formidable')
-var static = require('node-static')
+var mime = require('mime')
 var wrench = require('wrench')
 
 var fs = require('fs')
@@ -20,41 +20,53 @@ var routes = {
 
 app.settings = function(opts) {
   for (var opt in opts) {
-    if (opt in add) add[opt](opts[opt])
+    switch (opt) {
+      case 'static':
+        addStaticRouting(opts[opt])
+        break
+      case 'template':
+        cacheTemplates(opts[opt].dir)
+        break
+    }
   }
   return app
 }
 
-var add = {
-  static: function(opts) {
-    var file = new static.Server(opts.dir)
+var addStaticRouting = function(opts) {
+  var lastChar = opts.route.charAt(opts.route.length-1)
+  var route = lastChar !== '/' ? opts.route+'/' : opts.route
+  var regex = new RegExp('^'+route.replace(/\//g, '\\/')+'(.{0,})$')
+  
+  routes.get.addRoute(regex, function(req, res) {
+    var file = req.url.pathname.replace(route, '/')
+    file = path.join(opts.dir, file)
     
-    var last = opts.route.charAt(opts.route.length-1)
-    var regex = last !== '/' ? opts.route+'/' : opts.route
-    regex = '^'+regex.replace(/\//g, '\\/')+'(.{0,})$'
-    regex = new RegExp(regex)
-    
-    var staticCb = function(req, res) {
-      var f = req.url.pathname.match(regex)[1]
-      req.addListener('end', function() {
-        file.serveFile(f, 200, {}, req, res)
-      })
+    if (path.existsSync(file) === false) {
+      return res.end('404')
+    }
+    if (fs.statSync(file).isDirectory()) {
+      file = file+'/index.html'
+      if (path.existsSync(file) === false) {
+        return res.end('404')
+      }
     }
     
-    routes.get.addRoute(regex, staticCb, 1)
-    routes.post.addRoute(regex, staticCb, 1)
-  },
-  template: function(opts) {
-    var files = wrench.readdirSyncRecursive(opts.dir)
-    files.forEach(function(file) {
-      var p = path.join(opts.dir, file)
-      var stats = fs.statSync(p)
-      if ( stats.isDirectory() === false ) {
-        var template = fs.readFileSync(p)
-        cache[file] = template.toString()
-      }
-    })    
-  }
+    var content = fs.readFileSync(file)  
+    res.writeHead(200, { 'Content-Type': mime.lookup(file) })
+    res.end(content.toString())
+  }, 1)
+}
+
+var cacheTemplates = function(dir) {
+  var files = wrench.readdirSyncRecursive(dir)
+  files.forEach(function(file) {
+    var p = path.join(dir, file)
+    var stats = fs.statSync(p)
+    if ( stats.isDirectory() === false ) {
+      var content = fs.readFileSync(p)
+      cache[file] = content.toString()
+    }
+  })    
 }
 
 
