@@ -17,6 +17,13 @@ var routes = {
   post: crossroads.create()
 }
 
+var bypassed = function(req, res) {
+  res.show404()
+}
+
+routes.get.bypassed.add(bypassed)
+routes.post.bypassed.add(bypassed)
+
 
 app.settings = function(opts) {
   for (var opt in opts) {

@@ -67,6 +67,14 @@ describe('app', function() {
         done()
       })
     })
+    it('should return a 404 for an unmatched route', function(done) {
+      request('http://localhost:1234/doesnotexist', function(err, res, body) {
+        res.headers['content-type'].should.equal('text/html')
+        res.statusCode.should.equal(404)
+        body.should.equal('<h1>404, not found</h1>')
+        done()
+      })
+    })    
   })
   
   describe('post()', function() {
