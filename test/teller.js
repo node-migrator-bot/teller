@@ -5,9 +5,6 @@ require('../index')
   .get('/', function(req, res) {
     res.end('get')
   })
-  .get(/^\/(reg|ex)$/, function(req, res) {
-    res.end('regex')
-  })
   .get('/query', function(req, res) {
     res.end(req.query.a)
   })
@@ -24,11 +21,11 @@ require('../index')
   .get('/404', function(req, res) {
     res.show404()
   })
+  .get('/send', function(req, res) {
+    res.send('a', 201, 'a/b')
+  })
   .post('/post', function(req, res) {
     res.end('post')
-  })
-  .post(/^\/[a-z][0-9]$/, function(req, res) {
-    res.end('regex')
   })
   .post('/body', function(req, res) {
     res.end(req.body.a)
@@ -48,14 +45,6 @@ describe('app', function() {
         should.not.exist(err)
         should.exist(res)
         body.should.equal('get')
-        done()
-      })
-    })
-    it('should match a regex route', function(done) {
-      request('http://localhost:1234/ex', function(err, res, body) {
-        should.not.exist(err)
-        should.exist(res)
-        body.should.equal('regex')
         done()
       })
     })
@@ -87,18 +76,6 @@ describe('app', function() {
         should.not.exist(err)
         should.exist(res)
         body.should.equal('post')
-        done()
-      })
-    })
-    it('should match a regex route', function(done) {
-      request({
-        form: {},
-        url: 'http://localhost:1234/a1',
-        method: 'post'
-      }, function(err, res, body) {
-        should.not.exist(err)
-        should.exist(res)
-        body.should.equal('regex')
         done()
       })
     })
@@ -200,6 +177,17 @@ describe('res', function() {
         should.not.exist(err)
         res.statusCode.should.equal(303)
         res.headers.location.should.equal('/render')
+        done()
+      })
+    })
+  })
+  
+  describe('send()', function() {
+    it('should respond with correct headers and status code', function(done) {
+      request('http://localhost:1234/send', function(err, res, body) {
+        res.headers['content-type'].should.equal('a/b')
+        res.statusCode.should.equal(201)
+        body.should.equal('a')
         done()
       })
     })

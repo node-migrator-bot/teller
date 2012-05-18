@@ -12,17 +12,6 @@ var url = require('url')
 
 var app = {}
 var cache = {}
-var routes = {
-  get: crossroads.create(),
-  post: crossroads.create()
-}
-
-var bypassed = function(req, res) {
-  res.show404()
-}
-
-routes.get.bypassed.add(bypassed)
-routes.post.bypassed.add(bypassed)
 
 
 app.settings = function(opts) {
@@ -36,9 +25,9 @@ var add = {}
 add.static = function(opts) {
   var lastChar = opts.route.charAt(opts.route.length-1)
   var route = lastChar !== '/' ? opts.route+'/' : opts.route
-  var routeExp = route+':file*:'
+  var routeExp = 'GET '+route+':file*:'
   
-  routes.get.addRoute(routeExp, function(req, res) {
+  crossroads.addRoute(routeExp, function(req, res) {
     var file = req.url.pathname.replace(route, '/')
     file = path.join(opts.dir, file)
     if (path.existsSync(file)) filed(file).pipe(res)
@@ -73,6 +62,10 @@ var show404 = function() {
   this.send('<h1>404, not found</h1>', 404)
 }
 
+crossroads.bypassed.add(function(req, res) {
+  res.show404()
+})
+
 var json = function(obj, code) {
   var body = JSON.stringify(obj)
   this.send(body, code, 'application/json')
@@ -100,8 +93,8 @@ var server = function(req, res) {
   res.show404 = show404
   req.url = url.parse(req.url)
 
-  var method = req.method.toLowerCase()
-  routes[method].parse(req.url.pathname, [req, res])
+  var route = req.method+' '+req.url.pathname
+  crossroads.parse(route, [req, res])
 }
 
 app.listen = function(port) {
@@ -111,7 +104,7 @@ app.listen = function(port) {
 
 
 app.get = function(route, cb) {
-  routes.get.addRoute(route, function(req, res) {
+  crossroads.addRoute('GET '+route, function(req, res) {
     req.query = qs.parse(req.url.query)
     cb(req, res)
   })
@@ -119,7 +112,7 @@ app.get = function(route, cb) {
 }
 
 app.post = function(route, cb) {
-  routes.post.addRoute(route, function(req, res) {
+  crossroads.addRoute('POST '+route, function(req, res) {
     var form = new formidable.IncomingForm()
     form.parse(req, function(err, fields, files) {
       req.body = fields
