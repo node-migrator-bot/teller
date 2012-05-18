@@ -11,7 +11,7 @@
   "dependencies": {
     "crossroads": "0.8.0",
     "ejs": "0.7.1",
-    "mime": "1.2.5",
+    "filed": "0.0.6",
     "formidable": "1.0.9",
     "wrench": "1.3.9"
   },

@@ -1,7 +1,7 @@
 var crossroads = require('crossroads')
 var ejs = require('ejs')
+var filed = require('filed')
 var formidable = require('formidable')
-var mime = require('mime')
 var wrench = require('wrench')
 
 var fs = require('fs')
@@ -27,49 +27,31 @@ routes.post.bypassed.add(bypassed)
 
 app.settings = function(opts) {
   for (var opt in opts) {
-    switch (opt) {
-      case 'static':
-        addStaticRouting(opts[opt])
-        break
-      case 'template':
-        cacheTemplates(opts[opt].dir)
-        break
-    }
+    if (opt in add) add[opt](opts[opt])
   }
   return app
 }
 
-var addStaticRouting = function(opts) {
+var add = {}
+add.static = function(opts) {
   var lastChar = opts.route.charAt(opts.route.length-1)
   var route = lastChar !== '/' ? opts.route+'/' : opts.route
-  var regex = new RegExp('^'+route.replace(/\//g, '\\/')+'(.{0,})$')
+  var routeExp = route+':file*:'
   
-  routes.get.addRoute(regex, function(req, res) {
+  routes.get.addRoute(routeExp, function(req, res) {
     var file = req.url.pathname.replace(route, '/')
     file = path.join(opts.dir, file)
-    
-    if (path.existsSync(file) === false) {
-      return res.show404()
-    }
-    if (fs.statSync(file).isDirectory()) {
-      file = file+'/index.html'
-      if (path.existsSync(file) === false) {
-        return res.show404()
-      }
-    }
-    
-    var content = fs.readFileSync(file)  
-    res.writeHead(200, { 'Content-Type': mime.lookup(file) })
-    res.end(content.toString())
+    if (path.existsSync(file)) filed(file).pipe(res)
+    else res.show404()
   }, 1)
 }
 
-var cacheTemplates = function(dir) {
-  var files = wrench.readdirSyncRecursive(dir)
+add.template = function(opts) {
+  var files = wrench.readdirSyncRecursive(opts.dir)
   files.forEach(function(file) {
-    var p = path.join(dir, file)
+    var p = path.join(opts.dir, file)
     var stats = fs.statSync(p)
-    if ( stats.isDirectory() === false ) {
+    if (stats.isDirectory() === false) {
       var content = fs.readFileSync(p)
       cache[file] = content.toString()
     }
@@ -84,24 +66,23 @@ var render = function(template, data, code) {
   }
   
   var html = ejs.render(cache[template], data)
-  code = code === undefined ? 200 : code
-  var head = { 'Content-Type': 'text/html' }
-  this.writeHead(code, head)
-  this.end(html)
+  this.send(html, code)
 }
 
 var show404 = function() {
-  var head = { 'Content-Type': 'text/html' }
-  this.writeHead(404, head)
-  this.end('<h1>404, not found</h1>')
+  this.send('<h1>404, not found</h1>', 404)
 }
 
 var json = function(obj, code) {
   var body = JSON.stringify(obj)
-  code = code === undefined ? 200 : code
-  var head = { 'Content-Type': 'application/json' }
-  this.writeHead(code, head)
-  this.end(body)
+  this.send(body, code, 'application/json')
+}
+
+var send = function(output, code, type) {
+  code = code || 200
+  type = type || 'text/html'
+  this.writeHead(code, { 'Content-Type': type })
+  this.end(String(output));
 }
 
 var redirect = function(url, code) {
@@ -115,6 +96,7 @@ var server = function(req, res) {
   res.json = json
   res.render = render
   res.redirect = redirect
+  res.send = send
   res.show404 = show404
   req.url = url.parse(req.url)
 

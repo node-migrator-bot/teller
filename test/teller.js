@@ -118,10 +118,10 @@ describe('app', function() {
   
   describe('settings()', function() {
     it('should allow static file serving', function(done) {
-      request('http://localhost:1234/public/static.txt', function(err, res, body) {
+      request('http://localhost:1234/public/static.html', function(err, res, body) {
         should.not.exist(err)
         should.exist(res)
-        res.headers['content-type'].should.equal('text/plain')
+        res.headers['content-type'].should.equal('text/html')
         res.statusCode.should.equal(200)
         body.should.equal('static')
         done()
