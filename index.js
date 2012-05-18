@@ -97,6 +97,11 @@ var server = function(req, res) {
   crossroads.parse(route, [req, res])
 }
 
+var addRoute = function(method, route, cb) {
+  route = method+' '+route
+  crossroads.addRoute(route, cb);
+}
+
 app.listen = function(port) {
   http.createServer(server).listen(port)
   return app
@@ -104,7 +109,7 @@ app.listen = function(port) {
 
 
 app.get = function(route, cb) {
-  crossroads.addRoute('GET '+route, function(req, res) {
+  addRoute('GET', route, function(req, res) {
     req.query = qs.parse(req.url.query)
     cb(req, res)
   })
@@ -112,7 +117,7 @@ app.get = function(route, cb) {
 }
 
 app.post = function(route, cb) {
-  crossroads.addRoute('POST '+route, function(req, res) {
+  addRoute('POST', route, function(req, res) {
     var form = new formidable.IncomingForm()
     form.parse(req, function(err, fields, files) {
       req.body = fields
