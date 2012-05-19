@@ -17,29 +17,31 @@ app.get('/', function(req, res) {
 }).listen(1234)
 ```
 
-## Request
+## Routing
 
-### app.get()
+See [crossroads.addRoute](http://millermedeiros.github.com/crossroads.js/#crossroads-add_route) for more documentation on route patterns. Teller only supports string patterns, and named variables are available in [req.route](#reqroute).
 
-Add an GET route with callback. The query string will be parsed and available in req.query.
+### app.get(route, callback)
+
+Add an GET route with callback.
 
 ```javascript
-app.get(route, function(req, res) {
-  console.log(req.query)
+app.get('/', function(req, res) {
+  res.send('<h1>Hello world!</h1>')
 })
 ```
 
-### app.post()
+### app.post(route, callback)
 
-Add a POST route with callback. The body and files in the request will be parsed and available in req.body and req.files.
+Add a POST route with callback.
 
 ```javascript
-app.post(route, function(req, res) {
-  console.log(req.body)
+app.post('/add', function(req, res) {
+  res.json(req.body)
 })
 ```
 
-### app.settings()
+### app.settings(settings)
 
 Settings for template rendering and static file serving.
 
@@ -50,7 +52,7 @@ app.settings({
 })
 ```
 
-### app.listen()
+### app.listen(port)
 
 Begin accepting connections on the specified port.
 
@@ -58,36 +60,82 @@ Begin accepting connections on the specified port.
 app.listen(1234)
 ```
 
+## Request
+
+### req.route
+
+Contains named variables (see [Routing](#routing)) as key-value pairs.
+
+```javascript
+app.get('/:foo:', function(req, res) {
+  console.log(req.route.foo)
+  // GET /bar would log 'bar'
+})
+```
+
+### req.query
+
+Contains a parsed query string for GET requests.
+
+```javascript
+app.get('/qs', function(req, res) {
+  console.log(req.query.foo)
+  // GET /qs?foo=bar would log 'bar'
+})
+```
+
+### req.body
+
+Contains a parsed form body for POST requests.
+
+```javascript
+app.post('/form', function(req, res) {
+  console.log(req.body.foo)
+  // POST /form foo=bar would log 'bar'
+})
+```
+
 ## Response
 
-### res.render()
+### res.json(obj [, statusCode])
 
-Render the specified template, the path of which must be specified in app.settings(). Data and statusCode are not required.
+Render the object as json.
 
 ```javascript
-app.settings({ dir: __dirname+'/templates' })
 app.get(route, function(req, res) {
-  res.render('template.ejs', data, statusCode)
+  res.json({ foo: bar })
 })
 ```
 
-### res.json()
+### res.redirect(url [, statusCode])
 
-Render the object as json. StatusCode is not required.
+Redirect to another url.
 
 ```javascript
 app.get(route, function(req, res) {
-  res.json({ foo: bar }, statusCode)
+  res.redirect('/login')
 })
 ```
 
-### res.redirect()
+### res.render(template [, data [, statusCode]])
 
-Redirect to another url. StatusCode is not required.
+Render the specified template. Template directory must be specified in [app.settings()](#appsettingssettings).
+
+```javascript
+app
+  .settings({ dir: __dirname+'/templates' })
+  .get(route, function(req, res) {
+    res.render('template.ejs', data, statusCode)
+  })
+```
+
+### res.send(data [, contentType [, statusCode]])
+
+Renders a string, with optional Content-Type header and status code.
 
 ```javascript
 app.get(route, function(req, res) {
-  res.redirect('/login', statusCode)
+  res.send('<h1>hello</h1>')
 })
 ```
 
