@@ -25,9 +25,7 @@ var add = {}
 add.static = function(opts) {
   var lastChar = opts.route.charAt(opts.route.length-1)
   var route = lastChar !== '/' ? opts.route+'/' : opts.route
-  var routeExp = 'GET '+route+':file*:'
-  
-  crossroads.addRoute(routeExp, function(req, res) {
+  addRoute('GET', route+':file*:', function(req, res) {
     var file = req.url.pathname.replace(route, '/')
     file = path.join(opts.dir, file)
     if (path.existsSync(file)) filed(file).pipe(res)
@@ -53,7 +51,6 @@ var render = function(template, data, code) {
     throw new Error('template does not exist')
     return
   }
-  
   var html = ejs.render(cache[template], data)
   this.send(html, code)
 }
@@ -92,14 +89,23 @@ var server = function(req, res) {
   res.send = send
   res.show404 = show404
   req.url = url.parse(req.url)
-
   var route = req.method+' '+req.url.pathname
   crossroads.parse(route, [req, res])
 }
 
 var addRoute = function(method, route, cb) {
-  route = method+' '+route
-  crossroads.addRoute(route, cb);
+  var match = method+' '+route
+  var ids = crossroads.addRoute(match, function(req, res) {
+    if (ids.length > 0) {
+      req.route = {}
+      for (var i = 0; i < ids.length; i++) {
+        var part = ids[i].replace('*', '')
+        req.route[part] = arguments[i+2]
+      }
+    }
+    cb(req, res)
+  })._paramsIds
+  
 }
 
 app.listen = function(port) {
