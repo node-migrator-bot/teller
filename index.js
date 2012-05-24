@@ -124,12 +124,15 @@ app.get = function(route, cb) {
 
 app.post = function(route, cb) {
   addRoute('POST', route, function(req, res) {
-    var form = new formidable.IncomingForm()
-    form.parse(req, function(err, fields, files) {
-      req.body = fields
-      req.files = files
+    var parsed = function(err, body, files) {
+      req.body = body || {}
+      req.files = files || {}
       cb(req, res)
-    })
+    }
+    
+    var form = new formidable.IncomingForm()
+    try { form.parse(req, parsed) }
+    catch(e) { parsed() }
   })
   return app
 }
