@@ -41,6 +41,16 @@ app.post('/add', function(req, res) {
 })
 ```
 
+### app.delete(route, callback)
+
+Add a DELETE route with callback.
+
+```javascript
+app.delete('/image', function(req, res) {
+  res.json(req.body)
+})
+```
+
 ### app.settings(settings)
 
 Settings for template rendering and static file serving.
@@ -86,7 +96,7 @@ app.get('/qs', function(req, res) {
 
 ### req.body
 
-Contains a parsed form body for POST requests.
+Contains a parsed form body for POST & DELETE requests.
 
 ```javascript
 app.post('/form', function(req, res) {

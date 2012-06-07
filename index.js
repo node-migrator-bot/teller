@@ -76,7 +76,7 @@ var send = function(output, code, type) {
 }
 
 var redirect = function(url, code) {
-  code = code === undefined ? 302 : code
+  code = code || 302
   this.writeHead(code, { Location: url })
   this.end()
 }
@@ -105,7 +105,6 @@ var addRoute = function(method, route, cb) {
     }
     cb(req, res)
   })._paramsIds
-  
 }
 
 app.listen = function(port) {
@@ -123,19 +122,27 @@ app.get = function(route, cb) {
 }
 
 app.post = function(route, cb) {
-  addRoute('POST', route, function(req, res) {
+  addRoute('POST', route, parseForm(cb))
+  return app
+}
+
+app.delete = function(route, cb) {
+  addRoute('DELETE', route, parseForm(cb))
+  return app
+}
+
+var parseForm = function(cb) {
+  return function(req, res) {
     var parsed = function(err, body, files) {
       req.body = body || {}
       req.files = files || {}
       cb(req, res)
     }
-    
+  
     var form = new formidable.IncomingForm()
     try { form.parse(req, parsed) }
     catch(e) { parsed() }
-  })
-  return app
+  }
 }
-
 
 module.exports = app

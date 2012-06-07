@@ -36,6 +36,15 @@ require('../index')
   .post('/match/:a:/:b:', function(req, res) {
     res.json(req.route)
   })
+  .delete('/delete', function(req, res) {
+    res.end('delete')
+  })
+  .delete('/del', function(req, res) {
+    res.send(req.body.a)
+  })
+  .delete('/match/:a:/:b:', function(req, res) {
+    res.json(req.route)
+  })
   .settings({
     template: { dir: __dirname },
     static: { route: '/public', dir: __dirname+'/static' }
@@ -86,7 +95,6 @@ describe('app', function() {
   describe('post()', function() {
     it('should match a string route', function(done) {
       request({
-        form: {},
         url: 'http://localhost:1234/post',
         method: 'post'
       }, function(err, res, body) {
@@ -110,7 +118,6 @@ describe('app', function() {
     })
     it('pass through variables defined in the route', function(done) {
       request({
-        form: {},
         url: 'http://localhost:1234/match/c/d',
         method: 'post'
       }, function(err, res, body) {
@@ -124,9 +131,58 @@ describe('app', function() {
     })
     it('should return a 404 for an unmatched route', function(done) {
       request({
-        form: {},
         url: 'http://localhost:1234/doesnotexist',
         method: 'post'
+      }, function(err, res, body) {
+        res.headers['content-type'].should.equal('text/html')
+        res.statusCode.should.equal(404)
+        body.should.equal('<h1>404, not found</h1>')
+        done()
+      })
+    })
+  })
+  
+  describe('delete()', function() {
+    it('should match a string route', function(done) {
+      request({
+        url: 'http://localhost:1234/delete',
+        method: 'delete'
+      }, function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        body.should.equal('delete')
+        done()
+      })
+    })
+    it('should pass through parsed form fields', function(done) {
+      request({
+        form: { a: 1 },
+        url: 'http://localhost:1234/del',
+        method: 'delete'
+      }, function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        body.should.equal('1')
+        done()
+      })
+    })
+    it('pass through variables defined in the route', function(done) {
+      request({
+        url: 'http://localhost:1234/match/c/d',
+        method: 'delete'
+      }, function(err, res, body) {
+        should.not.exist(err)
+        should.exist(res)
+        var json = JSON.parse(body)
+        json.a.should.equal('c')
+        json.b.should.equal('d')
+        done()
+      })
+    })
+    it('should return a 404 for an unmatched route', function(done) {
+      request({
+        url: 'http://localhost:1234/doesnotexist',
+        method: 'delete'
       }, function(err, res, body) {
         res.headers['content-type'].should.equal('text/html')
         res.statusCode.should.equal(404)
