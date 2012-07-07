@@ -28,7 +28,7 @@ add.static = function(opts) {
   addRoute('GET', route+':file*:', function(req, res) {
     var file = req.url.pathname.replace(route, '/')
     file = path.join(opts.dir, file)
-    if (path.existsSync(file)) filed(file).pipe(res)
+    if (fs.existsSync(file)) filed(file).pipe(res)
     else res.show404()
   }, 1)
 }
